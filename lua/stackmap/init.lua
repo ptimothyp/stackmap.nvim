@@ -24,34 +24,43 @@ M.push = function (name, mode, mappings)
 	for lhs, rhs in pairs(mappings) do
 		local existing = find_mapping(maps, lhs)
 		if existing then
+			existing_maps[lhs] = existing
 			table.insert(existing_maps, existing)
 		end
-	end
-
-	M._stack[name] = existing_maps
-	for lhs, rhs in pairs(mappings) do
 		vim.keymap.set(mode, lhs, rhs)
 	end
+
+	M._stack[name] = {
+		existing = existing_maps,
+		mappings = mappings,
+		mode = mode,
+	}
 	-- vim.keymap.set(mode, mappings)
 	-- P(maps)
 end
 
 
 M.pop = function (name)
-	for lhs, rhs in pairs(M_.existing_maps) do
-		vim.keymap.set(mode, lhs, rhs)
+	local state = M._stack[name];
+	local existing = state.existing
+	local mappings = state.mappings
+
+	M._stack[name] = nil
+
+	for lhs, _ in pairs(mappings) do
+		if  existing[lhs] then
+			vim.keymap.set(state.mode, lhs, existing[lhs].rhs)
+		else
+			vim.keymap.del(state.mode, lhs)
+		end
 	end
-	
+
 end
 
-M.push('debug_mode', 'n' , {
-	[" st"] = "echo Hello",
-	[" sz"] = "echo Goodbye",
-	[" w"] = "echo Write",
-	[" t"] = "<Plug>PlenaryTestFile"
-})
 -- vim.keymap.set()
 -- vim.api.nvim_get_keymap('n')
 -- vim.api.nvim_get_keymap('n')
 
 return M
+
+

@@ -42,6 +42,9 @@ end
 
 M.pop = function (name)
 	local state = M._stack[name];
+	if state == nil then
+		return
+	end
 	local existing = state.existing
 	local mappings = state.mappings
 

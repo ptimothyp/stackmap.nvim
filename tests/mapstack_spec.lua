@@ -26,6 +26,17 @@ describe("mapstack", function ()
 		assert.are_same(rhs, found.rhs)
 	end)
 
+it("can push a multiple map", function ()
+		local rhs = "echo Hello"
+		require("stackmap").push("abcd", "n", {
+			["asdf"] = rhs,
+			["asdf1"] = rhs,
+		})
+
+		local current_mapping = vim.api.nvim_get_keymap("n")
+		local found = find_map(current_mapping, "asdf")
+		assert.are_same(rhs, found.rhs)
+	end)
 	it("can delete mapping after pop : no original mapping", function ()
 		local rhs = "echo Hello"
 		require("stackmap").push("abcd", "n", {
@@ -50,4 +61,13 @@ describe("mapstack", function ()
 		local found = find_map(current_mapping, "asdf")
 		assert.are_same("echo 'OGG mapping'", found.rhs)
 	end)
+
+	it("does nothing when pop desn't exist", function ()
+
+		require("stackmap").pop("abcd")
+		local current_mapping = vim.api.nvim_get_keymap("n")
+		local found = find_map(current_mapping, "asdf")
+		assert.are_same(nil, found)
+	end)
 end)
+
